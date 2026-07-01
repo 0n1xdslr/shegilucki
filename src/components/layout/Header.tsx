@@ -1,7 +1,10 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu, Sun, Moon } from 'lucide-react';
 
 export default function Header({ 
   sidebarOpen, 
@@ -13,6 +16,29 @@ export default function Header({
   userProfile: any
 }) {
   const router = useRouter();
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const initialTheme = storedTheme || 'dark';
+    setTheme(initialTheme);
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -67,6 +93,14 @@ export default function Header({
               </span>
             </div>
             
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-2 rounded-md bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              title={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 rounded-md bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 hover:text-red-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
