@@ -1,26 +1,38 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-boxdark: #0f172a;
+  --color-boxdark-2: #020617;
+  --color-strokedark: #1e293b;
+  --color-bodydark: #cbd5e1;
+  --color-stroke: #e2e8f0;
+  --color-danger: #dc2626;
+  --color-warning: #ea580c;
+  --color-success: #16a34a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background-color: theme('colors.slate.50');
+    color: theme('colors.slate.800');
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .dark body {
+    background-color: var(--color-boxdark-2);
+    color: theme('colors.slate.200');
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .shadow-default {
+    box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07);
+  }
 }
