@@ -123,8 +123,6 @@ function LoginForm() {
         }
         setIsLoading(false);
       } else {
-        // 3. Registrar el inicio de sesión exitoso
-        await supabase.rpc('register_login_success', { user_email: email });
         router.push(cifrarUrl('/dashboard'));
         router.refresh();
       }

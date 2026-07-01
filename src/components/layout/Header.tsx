@@ -41,6 +41,7 @@ export default function Header({
   };
 
   const handleLogout = async () => {
+    sessionStorage.removeItem('login_logged');
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/login');

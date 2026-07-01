@@ -25,6 +25,13 @@ export default function DashboardLayout({
           return;
         }
 
+        // Registrar login exitoso una sola vez por sesión/pestaña
+        const loginLogged = sessionStorage.getItem('login_logged');
+        if (!loginLogged && session.user.email) {
+          await supabase.rpc('register_login_success', { user_email: session.user.email });
+          sessionStorage.setItem('login_logged', 'true');
+        }
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
