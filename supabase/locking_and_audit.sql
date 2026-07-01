@@ -156,3 +156,105 @@ BEGIN
   END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth;
+
+-- 6. POLÍTICAS DE RLS ACTUALIZADAS PARA AUDITORÍA (INCLUYE SUPER_ADMIN)
+DROP POLICY IF EXISTS "Admins and Auditors can read audit logs" ON public.audit_logs;
+CREATE POLICY "Admins, Auditors and SuperAdmins can read audit logs" ON public.audit_logs 
+  FOR SELECT USING (public.get_user_role() IN ('admin', 'auditor', 'super_admin'));
+
+-- 7. AUDITORÍA AUTOMÁTICA DE CREACIÓN/MUTACIÓN DE USUARIOS (PROFILES)
+CREATE OR REPLACE FUNCTION public.audit_profiles_mutations()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_operator_id UUID;
+  v_ip TEXT;
+  v_ua TEXT;
+BEGIN
+  v_operator_id := auth.uid();
+  v_ip := public.get_client_ip();
+  v_ua := public.get_client_user_agent();
+
+  IF (TG_OP = 'INSERT') THEN
+    INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, new_data, ip_address, user_agent)
+    VALUES (v_operator_id, 'CREATE_USER', 'profiles', NEW.id, row_to_json(NEW)::jsonb, v_ip, v_ua);
+    RETURN NEW;
+  ELSIF (TG_OP = 'UPDATE') THEN
+    IF (OLD.role IS DISTINCT FROM NEW.role OR OLD.full_name IS DISTINCT FROM NEW.full_name OR OLD.email IS DISTINCT FROM NEW.email) THEN
+      INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, old_data, new_data, ip_address, user_agent)
+      VALUES (v_operator_id, 'UPDATE_USER', 'profiles', NEW.id, row_to_json(OLD)::jsonb, row_to_json(NEW)::jsonb, v_ip, v_ua);
+    END IF;
+    RETURN NEW;
+  ELSIF (TG_OP = 'DELETE') THEN
+    INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, old_data, ip_address, user_agent)
+    VALUES (v_operator_id, 'DELETE_USER', 'profiles', OLD.id, row_to_json(OLD)::jsonb, v_ip, v_ua);
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS audit_profiles_trigger ON public.profiles;
+CREATE TRIGGER audit_profiles_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.audit_profiles_mutations();
+
+-- 8. AUDITORÍA AUTOMÁTICA DE ENTIDADES DE RIESGO
+CREATE OR REPLACE FUNCTION public.audit_generic_mutations()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_operator_id UUID;
+  v_ip TEXT;
+  v_ua TEXT;
+  v_old JSONB := NULL;
+  v_new JSONB := NULL;
+  v_entity_id UUID;
+BEGIN
+  v_operator_id := auth.uid();
+  v_ip := public.get_client_ip();
+  v_ua := public.get_client_user_agent();
+
+  IF (TG_OP = 'DELETE') THEN
+    v_entity_id := OLD.id;
+    v_old := row_to_json(OLD)::jsonb;
+  ELSE
+    v_entity_id := NEW.id;
+    v_new := row_to_json(NEW)::jsonb;
+    IF (TG_OP = 'UPDATE') THEN
+      v_old := row_to_json(OLD)::jsonb;
+    END IF;
+  END IF;
+
+  INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, old_data, new_data, ip_address, user_agent)
+  VALUES (
+    v_operator_id,
+    TG_OP,
+    TG_TABLE_NAME,
+    v_entity_id,
+    v_old,
+    v_new,
+    v_ip,
+    v_ua
+  );
+
+  IF (TG_OP = 'DELETE') THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS audit_assets_trigger ON public.assets;
+CREATE TRIGGER audit_assets_trigger AFTER INSERT OR UPDATE OR DELETE ON public.assets FOR EACH ROW EXECUTE FUNCTION public.audit_generic_mutations();
+
+DROP TRIGGER IF EXISTS audit_threats_trigger ON public.threats;
+CREATE TRIGGER audit_threats_trigger AFTER INSERT OR UPDATE OR DELETE ON public.threats FOR EACH ROW EXECUTE FUNCTION public.audit_generic_mutations();
+
+DROP TRIGGER IF EXISTS audit_vulnerabilities_trigger ON public.vulnerabilities;
+CREATE TRIGGER audit_vulnerabilities_trigger AFTER INSERT OR UPDATE OR DELETE ON public.vulnerabilities FOR EACH ROW EXECUTE FUNCTION public.audit_generic_mutations();
+
+DROP TRIGGER IF EXISTS audit_risks_trigger ON public.risks;
+CREATE TRIGGER audit_risks_trigger AFTER INSERT OR UPDATE OR DELETE ON public.risks FOR EACH ROW EXECUTE FUNCTION public.audit_generic_mutations();
+
+DROP TRIGGER IF EXISTS audit_treatment_plans_trigger ON public.treatment_plans;
+CREATE TRIGGER audit_treatment_plans_trigger AFTER INSERT OR UPDATE OR DELETE ON public.treatment_plans FOR EACH ROW EXECUTE FUNCTION public.audit_generic_mutations();
