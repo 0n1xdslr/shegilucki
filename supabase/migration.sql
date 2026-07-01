@@ -449,23 +449,20 @@ BEGIN
   SELECT * INTO v_profile FROM public.profiles WHERE email = user_email;
   
   IF v_profile IS NOT NULL THEN
-    -- Resetea intentos si el uid del cliente en sesión coincide con el del perfil
-    IF auth.uid() = v_profile.id THEN
-      UPDATE public.profiles 
-      SET failed_login_attempts = 0, locked_until = NULL
-      WHERE id = v_profile.id;
-      
-      INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, new_data, ip_address, user_agent)
-      VALUES (
-        v_profile.id,
-        'LOGIN_SUCCESS',
-        'auth',
-        v_profile.id,
-        jsonb_build_object('email', user_email),
-        v_ip,
-        v_ua
-      );
-    END IF;
+    UPDATE public.profiles 
+    SET failed_login_attempts = 0, locked_until = NULL
+    WHERE id = v_profile.id;
+    
+    INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, new_data, ip_address, user_agent)
+    VALUES (
+      v_profile.id,
+      'LOGIN_SUCCESS',
+      'auth',
+      v_profile.id,
+      jsonb_build_object('email', user_email),
+      v_ip,
+      v_ua
+    );
   END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth;

@@ -76,7 +76,7 @@ export default async function AuditoriaPage({
                   </td>
                   <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                     <p className="text-black dark:text-white font-medium">
-                      {log.profiles?.email || 'Sistema'}
+                      {log.profiles?.email || (log.new_data?.email ? `${log.new_data.email} (Anon)` : 'Sistema')}
                     </p>
                   </td>
                   <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
