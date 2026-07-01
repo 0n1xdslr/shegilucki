@@ -168,6 +168,19 @@ BEGIN
     RAISE EXCEPTION 'Acceso denegado: solo administradores pueden crear usuarios';
   END IF;
 
+  -- Validate password strength
+  IF char_length(user_password) < 10 THEN
+    RAISE EXCEPTION 'La contraseña debe tener al menos 10 caracteres.';
+  ELSIF user_password !~ '[A-Z]' THEN
+    RAISE EXCEPTION 'La contraseña debe contener al menos una letra mayúscula (A-Z).';
+  ELSIF user_password !~ '[a-z]' THEN
+    RAISE EXCEPTION 'La contraseña debe contener al menos una letra minúscula (a-z).';
+  ELSIF user_password !~ '[0-9]' THEN
+    RAISE EXCEPTION 'La contraseña debe contener al menos un número (0-9).';
+  ELSIF user_password !~ '[!@#$%^&*(),.?":{}|<>_+\-=\[\]\\/;`~]' THEN
+    RAISE EXCEPTION 'La contraseña debe contener al menos un carácter especial (ej. !, @, #, $, etc.).';
+  END IF;
+
   -- Hash password using crypt from pgcrypto (which is enabled by default in Supabase)
   encrypted_pw := crypt(user_password, gen_salt('bf'));
 

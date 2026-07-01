@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { validatePassword } from '@/lib/utils/password';
 
 // --- ASSETS (ACTIVOS) ---
 export async function createAsset(formData: FormData) {
@@ -228,6 +229,12 @@ export async function createUserAction(formData: FormData) {
   const full_name = formData.get('full_name') as string;
   const role = formData.get('role') as string;
 
+  // Validate password strength server-side
+  const pwdCheck = validatePassword(password);
+  if (!pwdCheck.isValid) {
+    throw new Error(pwdCheck.message);
+  }
+
   const { data, error } = await supabase.rpc('create_new_user', {
     user_email: email,
     user_password: password,
@@ -247,6 +254,14 @@ export async function updateUserAction(id: string, formData: FormData) {
   const password = formData.get('password') as string || null;
   const full_name = formData.get('full_name') as string;
   const role = formData.get('role') as string;
+
+  // Validate password strength server-side if updating
+  if (password) {
+    const pwdCheck = validatePassword(password);
+    if (!pwdCheck.isValid) {
+      throw new Error(pwdCheck.message);
+    }
+  }
 
   const { error } = await supabase.rpc('update_existing_user', {
     target_user_id: id,

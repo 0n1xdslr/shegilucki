@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { ShieldAlert, Loader2, Mail, Lock, User, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cifrarUrl } from '@/lib/bloqueOcho';
-
+import { validatePassword } from '@/lib/utils/password';
 import { Suspense } from 'react';
 
 export default function LoginPage() {
@@ -30,6 +30,8 @@ function LoginForm() {
   const [fullName, setFullName] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  
+  const passwordInfo = validatePassword(password);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -68,6 +70,13 @@ function LoginForm() {
     const supabase = createClient();
 
     if (isSignUp) {
+      const pwdCheck = validatePassword(password);
+      if (!pwdCheck.isValid) {
+        setErrorMsg(pwdCheck.message);
+        setIsLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -247,6 +256,82 @@ function LoginForm() {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+
+              {isSignUp && password && (
+                <div className="mt-2 space-y-2 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-lg border border-gray-100 dark:border-slate-700/50">
+                  {/* Strength Bar */}
+                  <div className="flex gap-1.5 h-1.5 w-full bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-full flex-1 rounded-full transition-all duration-300 ${
+                          i < passwordInfo.score
+                            ? passwordInfo.score <= 1
+                              ? 'bg-red-500'
+                              : passwordInfo.score === 2
+                              ? 'bg-orange-500'
+                              : passwordInfo.score === 3
+                              ? 'bg-yellow-500'
+                              : passwordInfo.score === 4
+                              ? 'bg-emerald-400'
+                              : 'bg-emerald-600'
+                            : 'bg-transparent'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Strength Label */}
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-gray-500 dark:text-gray-400">Seguridad de contraseña:</span>
+                    <span className={`font-semibold ${
+                      passwordInfo.score <= 1
+                        ? 'text-red-500'
+                        : passwordInfo.score === 2
+                        ? 'text-orange-500'
+                        : passwordInfo.score === 3
+                        ? 'text-yellow-500'
+                        : passwordInfo.score === 4
+                        ? 'text-emerald-400'
+                        : 'text-emerald-600'
+                    }`}>
+                      {passwordInfo.score <= 1
+                        ? 'Muy Débil'
+                        : passwordInfo.score === 2
+                        ? 'Débil'
+                        : passwordInfo.score === 3
+                        ? 'Moderada'
+                        : passwordInfo.score === 4
+                        ? 'Segura'
+                        : 'Muy Segura'}
+                    </span>
+                  </div>
+
+                  {/* Requirements Checklist */}
+                  <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+                    <li className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full transition-colors ${passwordInfo.hasMinLength ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                      <span>Mínimo 10 caracteres</span>
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full transition-colors ${passwordInfo.hasUppercase ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                      <span>Una mayúscula (A-Z)</span>
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full transition-colors ${passwordInfo.hasLowercase ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                      <span>Una minúscula (a-z)</span>
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full transition-colors ${passwordInfo.hasDigit ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                      <span>Un número (0-9)</span>
+                    </li>
+                    <li className="flex items-center gap-1.5 col-span-2">
+                      <span className={`w-1.5 h-1.5 rounded-full transition-colors ${passwordInfo.hasSpecial ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                      <span>Carácter especial (ej. !, @, #, $, etc.)</span>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             <button

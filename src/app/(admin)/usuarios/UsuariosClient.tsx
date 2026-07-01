@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { PlusCircle, Search, Edit2, Trash2, Shield, User } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import { createUserAction, updateUserAction, deleteUserAction } from '@/actions';
+import { validatePassword } from '@/lib/utils/password';
 
 export default function UsuariosClient({ initialUsers }: { initialUsers: any[] }) {
   const [users, setUsers] = useState(initialUsers);
@@ -11,8 +12,11 @@ export default function UsuariosClient({ initialUsers }: { initialUsers: any[] }
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const passwordInfo = validatePassword(password);
 
   const filteredUsers = users.filter(u => 
     (u.full_name || '').toLowerCase().includes(search.toLowerCase()) || 
@@ -22,6 +26,7 @@ export default function UsuariosClient({ initialUsers }: { initialUsers: any[] }
 
   const handleOpenModal = (user?: any) => {
     setEditingUser(user || null);
+    setPassword('');
     setErrorMessage('');
     setIsModalOpen(true);
   };
@@ -36,6 +41,18 @@ export default function UsuariosClient({ initialUsers }: { initialUsers: any[] }
     setIsSubmitting(true);
     setErrorMessage('');
     const formData = new FormData(e.currentTarget);
+    
+    // Check password validation
+    const typedPassword = formData.get('password') as string;
+    if (!editingUser || (editingUser && typedPassword)) {
+      const pwdCheck = validatePassword(typedPassword);
+      if (!pwdCheck.isValid) {
+        setErrorMessage(pwdCheck.message);
+        setIsSubmitting(false);
+        return;
+      }
+    }
+    
     try {
       if (editingUser) {
         await updateUserAction(editingUser.id, formData);
@@ -233,10 +250,88 @@ export default function UsuariosClient({ initialUsers }: { initialUsers: any[] }
             <input 
               type="password"
               name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required={!editingUser}
-              placeholder={editingUser ? "••••••••" : "Mínimo 6 caracteres"}
+              placeholder={editingUser ? "••••••••" : "Mínimo 10 caracteres"}
               className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4 text-slate-800 dark:text-white" 
             />
+
+            {password && (
+              <div className="mt-2 space-y-2 bg-slate-50 dark:bg-slate-800/40 p-3 rounded border border-stroke/40">
+                {/* Strength Bar */}
+                <div className="flex gap-1 h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                  {[...Array(5)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-full flex-1 rounded-full transition-all duration-300 ${
+                        i < passwordInfo.score
+                          ? passwordInfo.score <= 1
+                            ? 'bg-red-500'
+                            : passwordInfo.score === 2
+                            ? 'bg-orange-500'
+                            : passwordInfo.score === 3
+                            ? 'bg-yellow-500'
+                            : passwordInfo.score === 4
+                            ? 'bg-emerald-400'
+                            : 'bg-emerald-600'
+                          : 'bg-transparent'
+                      }`}
+                    />
+                  ))}
+                </div>
+                
+                {/* Strength Label */}
+                <div className="flex justify-between items-center text-[10px]">
+                  <span className="text-slate-500">Seguridad de contraseña:</span>
+                  <span className={`font-semibold ${
+                    passwordInfo.score <= 1
+                      ? 'text-red-500'
+                      : passwordInfo.score === 2
+                      ? 'text-orange-500'
+                      : passwordInfo.score === 3
+                      ? 'text-yellow-500'
+                      : passwordInfo.score === 4
+                      ? 'text-emerald-400'
+                      : 'text-emerald-600'
+                  }`}>
+                    {passwordInfo.score <= 1
+                      ? 'Muy Débil'
+                      : passwordInfo.score === 2
+                      ? 'Débil'
+                      : passwordInfo.score === 3
+                      ? 'Moderada'
+                      : passwordInfo.score === 4
+                      ? 'Segura'
+                      : 'Muy Segura'}
+                  </span>
+                </div>
+
+                {/* Requirements Checklist */}
+                <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-500">
+                  <li className="flex items-center gap-1">
+                    <span className={`w-1 h-1 rounded-full transition-colors ${passwordInfo.hasMinLength ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                    <span>Mínimo 10 caracteres</span>
+                  </li>
+                  <li className="flex items-center gap-1">
+                    <span className={`w-1 h-1 rounded-full transition-colors ${passwordInfo.hasUppercase ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                    <span>Una mayúscula (A-Z)</span>
+                  </li>
+                  <li className="flex items-center gap-1">
+                    <span className={`w-1 h-1 rounded-full transition-colors ${passwordInfo.hasLowercase ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                    <span>Una minúscula (a-z)</span>
+                  </li>
+                  <li className="flex items-center gap-1">
+                    <span className={`w-1 h-1 rounded-full transition-colors ${passwordInfo.hasDigit ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                    <span>Un número (0-9)</span>
+                  </li>
+                  <li className="flex items-center gap-1 col-span-2">
+                    <span className={`w-1 h-1 rounded-full transition-colors ${passwordInfo.hasSpecial ? 'bg-emerald-500' : 'bg-red-400'}`} />
+                    <span>Carácter especial (ej. !, @, #, $, etc.)</span>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
 
           <div>
