@@ -120,8 +120,8 @@ export default function VulnerabilidadesClient({ initialVulnerabilidades }: { in
                     <p className="text-black dark:text-white">{vulnerabilidad.description}</p>
                   </td>
                   <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                    <p className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-                        vulnerabilidad.is_active ? 'bg-success text-success' : 'bg-danger text-danger'
+                    <p className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+                        vulnerabilidad.is_active ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
                       }`}>
                       {vulnerabilidad.is_active ? 'Activo' : 'Inactivo'}
                     </p>

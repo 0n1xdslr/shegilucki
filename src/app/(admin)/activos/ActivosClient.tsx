@@ -126,8 +126,8 @@ export default function ActivosClient({ initialActivos }: { initialActivos: any[
                     <p className="text-black dark:text-white">{activo.description}</p>
                   </td>
                   <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                    <p className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-                        activo.is_active ? 'bg-success text-success' : 'bg-danger text-danger'
+                    <p className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+                        activo.is_active ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
                       }`}>
                       {activo.is_active ? 'Activo' : 'Inactivo'}
                     </p>
@@ -171,15 +171,15 @@ export default function ActivosClient({ initialActivos }: { initialActivos: any[
               name="type" 
               required
               defaultValue={editingActivo?.type || 'Tecnológico'} 
-              className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4"
+              className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4 text-slate-800 dark:text-white"
             >
-              <option value="Humano">Humano</option>
-              <option value="Tecnológico">Tecnológico</option>
-              <option value="Físico">Físico</option>
-              <option value="Intangible">Intangible</option>
-              <option value="Información">Información</option>
-              <option value="Software">Software</option>
-              <option value="Otro">Otro</option>
+              <option value="Humano" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Humano</option>
+              <option value="Tecnológico" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Tecnológico</option>
+              <option value="Físico" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Físico</option>
+              <option value="Intangible" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Intangible</option>
+              <option value="Información" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Información</option>
+              <option value="Software" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Software</option>
+              <option value="Otro" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Otro</option>
             </select>
           </div>
           <div>

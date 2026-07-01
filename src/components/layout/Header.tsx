@@ -3,7 +3,15 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { LogOut, Menu } from 'lucide-react';
 
-export default function Header({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean, setSidebarOpen: (val: boolean) => void }) {
+export default function Header({ 
+  sidebarOpen, 
+  setSidebarOpen,
+  userProfile 
+}: { 
+  sidebarOpen: boolean, 
+  setSidebarOpen: (val: boolean) => void,
+  userProfile: any
+}) {
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -11,6 +19,18 @@ export default function Header({ sidebarOpen, setSidebarOpen }: { sidebarOpen: b
     await supabase.auth.signOut();
     router.push('/login');
     router.refresh();
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'super_admin': return 'Super Admin';
+      case 'admin': return 'Administrador';
+      case 'vendedor': return 'Vendedor';
+      case 'mecanico': return 'Mecánico';
+      case 'auditor': return 'Auditor';
+      case 'viewer': return 'Lector';
+      default: return role;
+    }
   };
 
   return (
@@ -29,10 +49,10 @@ export default function Header({ sidebarOpen, setSidebarOpen }: { sidebarOpen: b
             <Menu className="w-5 h-5" />
           </button>
         </div>
-
+ 
         <div className="hidden sm:block">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
-            Sistema de Gestión de Riesgos
+            Lucky Motors Risk & Operations
           </h2>
         </div>
 
@@ -40,10 +60,10 @@ export default function Header({ sidebarOpen, setSidebarOpen }: { sidebarOpen: b
           <div className="flex items-center gap-4">
             <div className="hidden md:block text-right">
               <span className="block text-sm font-medium text-slate-800 dark:text-white">
-                Auditor
+                {userProfile?.full_name || 'Cargando...'}
               </span>
               <span className="block text-xs font-medium text-slate-500">
-                admin@luckymotors.com
+                {getRoleLabel(userProfile?.role)} - {userProfile?.email}
               </span>
             </div>
             

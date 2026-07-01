@@ -126,11 +126,11 @@ export default function TratamientosClient({ initialTratamientos, riesgos }: Tra
                     <p className="text-sm text-slate-500">Nivel: {tratamiento.risks?.risk_level}</p>
                   </td>
                   <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-                    <p className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-                        tratamiento.strategy === 'Mitigar' ? 'bg-success text-success' :
-                        tratamiento.strategy === 'Evitar' ? 'bg-primary text-primary' :
-                        tratamiento.strategy === 'Transferir' ? 'bg-warning text-warning' :
-                        'bg-danger text-danger'
+                    <p className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+                        tratamiento.strategy === 'Mitigar' ? 'bg-success/10 text-success' :
+                        tratamiento.strategy === 'Evitar' ? 'bg-primary/10 text-primary' :
+                        tratamiento.strategy === 'Transferir' ? 'bg-warning/10 text-warning' :
+                        'bg-danger/10 text-danger'
                       }`}>
                       {tratamiento.strategy}
                     </p>
@@ -177,10 +177,10 @@ export default function TratamientosClient({ initialTratamientos, riesgos }: Tra
               name="risk_id" 
               required
               defaultValue={editingTratamiento?.risk_id || ''} 
-              className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4"
+              className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4 text-slate-800 dark:text-white"
             >
-              <option value="">Seleccione...</option>
-              {riesgos.map(r => <option key={r.id} value={r.id}>{r.name} - Nivel: {r.risk_level}</option>)}
+              <option value="" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Seleccione...</option>
+              {riesgos.map(r => <option key={r.id} value={r.id} className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">{r.name} - Nivel: {r.risk_level}</option>)}
             </select>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -190,12 +190,12 @@ export default function TratamientosClient({ initialTratamientos, riesgos }: Tra
                 name="strategy" 
                 required
                 defaultValue={editingTratamiento?.strategy || 'Mitigar'} 
-                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4"
+                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4 text-slate-800 dark:text-white"
               >
-                <option value="Mitigar">Mitigar</option>
-                <option value="Evitar">Evitar</option>
-                <option value="Transferir">Transferir</option>
-                <option value="Aceptar">Aceptar</option>
+                <option value="Mitigar" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Mitigar</option>
+                <option value="Evitar" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Evitar</option>
+                <option value="Transferir" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Transferir</option>
+                <option value="Aceptar" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Aceptar</option>
               </select>
             </div>
             <div>
@@ -204,12 +204,12 @@ export default function TratamientosClient({ initialTratamientos, riesgos }: Tra
                 name="status" 
                 required
                 defaultValue={editingTratamiento?.status || 'Pendiente'} 
-                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4"
+                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4 text-slate-800 dark:text-white"
               >
-                <option value="Pendiente">Pendiente</option>
-                <option value="En progreso">En progreso</option>
-                <option value="Implementado">Implementado</option>
-                <option value="Evaluación">Evaluación</option>
+                <option value="Pendiente" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Pendiente</option>
+                <option value="En progreso" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">En progreso</option>
+                <option value="Implementado" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Implementado</option>
+                <option value="Evaluación" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Evaluación</option>
               </select>
             </div>
           </div>

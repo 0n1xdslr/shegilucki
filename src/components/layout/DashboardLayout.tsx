@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardLayout({
   children,
@@ -10,10 +12,46 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
+    const supabase = createClient();
+    async function loadUser() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push('/login');
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          setUserProfile({
+            ...profile,
+            email: session.user.email,
+          });
+        } else {
+          setUserProfile({
+            id: session.user.id,
+            email: session.user.email,
+            full_name: session.user.user_metadata?.full_name || 'Usuario',
+            role: 'viewer',
+          });
+        }
+      } catch (err) {
+        console.error('Error loading user profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadUser();
+  }, [router]);
 
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">
@@ -24,12 +62,12 @@ export default function DashboardLayout({
       ) : (
         <div className="flex h-screen overflow-hidden">
           {/* SIDEBAR */}
-          <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} userProfile={userProfile} />
 
           {/* CONTENT AREA */}
           <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-900">
             {/* HEADER */}
-            <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+            <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} userProfile={userProfile} />
 
             {/* MAIN CONTENT */}
             <main>

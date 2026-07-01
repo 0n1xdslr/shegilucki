@@ -9,6 +9,8 @@
   --color-danger: #dc2626;
   --color-warning: #ea580c;
   --color-success: #16a34a;
+  --color-meta-4: #1e293b;
+  --color-primary: #3c50e0;
 }
 
 @layer base {

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { cifrarUrl, descifrarUrl } from '@/lib/bloqueOcho';
 import { 
   LayoutDashboard, 
   Users, 
@@ -8,10 +9,12 @@ import {
   Activity, 
   Grid, 
   CheckSquare, 
-  FileText, 
   History, 
   BarChart3, 
-  Settings 
+  Settings,
+  ShoppingBag,
+  Wrench,
+  UserCog
 } from 'lucide-react';
 
 const MENU_ITEMS = [
@@ -23,14 +26,42 @@ const MENU_ITEMS = [
   { name: 'Matriz', path: '/matriz', icon: Grid },
   { name: 'Mapa de Calor', path: '/mapa-calor', icon: Grid },
   { name: 'Tratamientos', path: '/tratamientos', icon: CheckSquare },
-  { name: 'Evidencias', path: '/evidencias', icon: FileText },
+  { name: 'Ventas', path: '/ventas', icon: ShoppingBag },
+  { name: 'Servicios', path: '/servicios', icon: Wrench },
   { name: 'Auditoría', path: '/auditoria', icon: History },
   { name: 'Reportes', path: '/reportes', icon: BarChart3 },
   { name: 'Configuración', path: '/configuracion', icon: Settings },
+  { name: 'Usuarios', path: '/usuarios', icon: UserCog },
 ];
 
-export default function Sidebar({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean, setSidebarOpen: (val: boolean) => void }) {
+export default function Sidebar({ 
+  sidebarOpen, 
+  setSidebarOpen,
+  userProfile 
+}: { 
+  sidebarOpen: boolean; 
+  setSidebarOpen: (val: boolean) => void;
+  userProfile: any;
+}) {
   const pathname = usePathname();
+  const role = userProfile?.role || 'viewer';
+
+  const allowedItems = MENU_ITEMS.filter((item) => {
+    if (role === 'vendedor') {
+      return item.name === 'Dashboard' || item.name === 'Ventas' || item.name === 'Reportes';
+    }
+    if (role === 'mecanico') {
+      return item.name === 'Dashboard' || item.name === 'Servicios' || item.name === 'Reportes';
+    }
+    if (role === 'viewer') {
+      return item.name === 'Dashboard';
+    }
+    if (role === 'admin' || role === 'super_admin') {
+      return true;
+    }
+    // auditor and others
+    return item.name !== 'Ventas' && item.name !== 'Servicios' && item.name !== 'Usuarios';
+  });
 
   return (
     <aside
@@ -66,14 +97,15 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: { sidebarOpen: 
               MENÚ PRINCIPAL
             </h3>
             <ul className="mb-6 flex flex-col gap-1.5">
-              {MENU_ITEMS.map((item) => {
-                const isActive = pathname.startsWith(item.path);
+              {allowedItems.map((item) => {
+                const currentDecryptedPath = pathname.startsWith('/c/') ? descifrarUrl(pathname) : pathname;
+                const isActive = currentDecryptedPath.startsWith(item.path);
                 const Icon = item.icon;
                 
                 return (
                   <li key={item.path}>
                     <Link
-                      href={item.path}
+                      href={cifrarUrl(item.path)}
                       className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-slate-200 duration-300 ease-in-out hover:bg-slate-800 ${
                         isActive ? 'bg-slate-800 text-white' : ''
                       }`}

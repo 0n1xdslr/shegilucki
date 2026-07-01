@@ -193,10 +193,10 @@ export default function RiesgosClient({ initialRiesgos, assets, threats, vulnera
                 name="asset_id" 
                 required
                 defaultValue={editingRiesgo?.asset_id || ''} 
-                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4"
+                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4 text-slate-800 dark:text-white"
               >
-                <option value="">Seleccione...</option>
-                {assets.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                <option value="" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Seleccione...</option>
+                {assets.map(a => <option key={a.id} value={a.id} className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">{a.name}</option>)}
               </select>
             </div>
             <div>
@@ -205,10 +205,10 @@ export default function RiesgosClient({ initialRiesgos, assets, threats, vulnera
                 name="threat_id" 
                 required
                 defaultValue={editingRiesgo?.threat_id || ''} 
-                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4"
+                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4 text-slate-800 dark:text-white"
               >
-                <option value="">Seleccione...</option>
-                {threats.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                <option value="" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Seleccione...</option>
+                {threats.map(t => <option key={t.id} value={t.id} className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">{t.name}</option>)}
               </select>
             </div>
             <div>
@@ -217,10 +217,10 @@ export default function RiesgosClient({ initialRiesgos, assets, threats, vulnera
                 name="vulnerability_id" 
                 required
                 defaultValue={editingRiesgo?.vulnerability_id || ''} 
-                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4"
+                className="w-full rounded border border-stroke bg-transparent px-4 py-2 outline-none focus:border-red-500 dark:border-strokedark dark:bg-meta-4 text-slate-800 dark:text-white"
               >
-                <option value="">Seleccione...</option>
-                {vulnerabilities.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                <option value="" className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">Seleccione...</option>
+                {vulnerabilities.map(v => <option key={v.id} value={v.id} className="bg-white dark:bg-boxdark text-slate-800 dark:text-white">{v.name}</option>)}
               </select>
             </div>
           </div>

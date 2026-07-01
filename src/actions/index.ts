@@ -218,3 +218,137 @@ export async function deleteTreatment(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath('/tratamientos');
 }
+
+// --- USER MANAGEMENT ---
+export async function createUserAction(formData: FormData) {
+  const supabase = await createClient();
+  
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const full_name = formData.get('full_name') as string;
+  const role = formData.get('role') as string;
+
+  const { data, error } = await supabase.rpc('create_new_user', {
+    user_email: email,
+    user_password: password,
+    user_full_name: full_name,
+    user_role: role
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/usuarios');
+  return data;
+}
+
+export async function updateUserAction(id: string, formData: FormData) {
+  const supabase = await createClient();
+
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string || null;
+  const full_name = formData.get('full_name') as string;
+  const role = formData.get('role') as string;
+
+  const { error } = await supabase.rpc('update_existing_user', {
+    target_user_id: id,
+    new_email: email,
+    new_password: password,
+    new_full_name: full_name,
+    new_role: role
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/usuarios');
+}
+
+export async function deleteUserAction(id: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc('delete_existing_user', {
+    target_user_id: id
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/usuarios');
+}
+
+// --- SALES (VENTAS) ---
+export async function createSaleAction(formData: FormData) {
+  const supabase = await createClient();
+  
+  const { error } = await supabase.from('sales').insert({
+    seller_id: formData.get('seller_id') || null,
+    customer_name: formData.get('customer_name'),
+    vehicle_details: formData.get('vehicle_details'),
+    amount: parseFloat(formData.get('amount') as string),
+    sale_date: formData.get('sale_date') || new Date().toISOString().split('T')[0],
+    notes: formData.get('notes'),
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/ventas');
+}
+
+export async function updateSaleAction(id: string, formData: FormData) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from('sales').update({
+    customer_name: formData.get('customer_name'),
+    vehicle_details: formData.get('vehicle_details'),
+    amount: parseFloat(formData.get('amount') as string),
+    sale_date: formData.get('sale_date'),
+    notes: formData.get('notes'),
+  }).eq('id', id);
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/ventas');
+}
+
+export async function deleteSaleAction(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('sales').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/ventas');
+}
+
+// --- SERVICES (SERVICIOS) ---
+export async function createServiceAction(formData: FormData) {
+  const supabase = await createClient();
+  
+  const { error } = await supabase.from('services').insert({
+    mechanic_id: formData.get('mechanic_id') || null,
+    customer_name: formData.get('customer_name'),
+    vehicle_details: formData.get('vehicle_details'),
+    description: formData.get('description'),
+    cost: parseFloat(formData.get('cost') as string),
+    service_date: formData.get('service_date') || new Date().toISOString().split('T')[0],
+    status: formData.get('status') || 'Realizado',
+    notes: formData.get('notes'),
+  });
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/servicios');
+}
+
+export async function updateServiceAction(id: string, formData: FormData) {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from('services').update({
+    customer_name: formData.get('customer_name'),
+    vehicle_details: formData.get('vehicle_details'),
+    description: formData.get('description'),
+    cost: parseFloat(formData.get('cost') as string),
+    service_date: formData.get('service_date'),
+    status: formData.get('status'),
+    notes: formData.get('notes'),
+  }).eq('id', id);
+
+  if (error) throw new Error(error.message);
+  revalidatePath('/servicios');
+}
+
+export async function deleteServiceAction(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('services').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/servicios');
+}
